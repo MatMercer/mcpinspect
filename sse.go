@@ -217,6 +217,9 @@ func (t *TraditionalSSETransport) Send(ctx context.Context, message *transport.B
 		return fmt.Errorf("transport not started or endpoint not received")
 	}
 
+	// Clean up null values from params
+	message = t.cleanMessage(message)
+
 	jsonData, err := json.Marshal(message)
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
@@ -284,4 +287,40 @@ func (t *TraditionalSSETransport) SetMessageHandler(handler func(ctx context.Con
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.messageHandler = handler
+}
+
+// cleanMessage removes null values from request params
+func (t *TraditionalSSETransport) cleanMessage(msg *transport.BaseJsonRpcMessage) *transport.BaseJsonRpcMessage {
+	if msg == nil || msg.JsonRpcRequest == nil || len(msg.JsonRpcRequest.Params) == 0 {
+		return msg
+	}
+
+	// Parse params, remove nulls, re-marshal
+	var params map[string]interface{}
+	if err := json.Unmarshal(msg.JsonRpcRequest.Params, &params); err != nil {
+		return msg
+	}
+
+	// Remove null values
+	cleaned := make(map[string]interface{})
+	for k, v := range params {
+		if v != nil {
+			cleaned[k] = v
+		}
+	}
+
+	// If empty after cleaning, set params to empty object
+	if len(cleaned) == 0 {
+		msg.JsonRpcRequest.Params = []byte("{}")
+		return msg
+	}
+
+	// Re-marshal
+	newParams, err := json.Marshal(cleaned)
+	if err != nil {
+		return msg
+	}
+
+	msg.JsonRpcRequest.Params = newParams
+	return msg
 }

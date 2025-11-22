@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sort"
+	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -61,6 +62,7 @@ type ServerInfo struct {
 	Type     string
 	URL      string
 	Command  string
+	Args     []string
 	Projects []string
 }
 
@@ -78,6 +80,7 @@ func listServers(config *ClaudeConfig) error {
 					Type:     server.Type,
 					URL:      server.URL,
 					Command:  server.Command,
+					Args:     server.Args,
 					Projects: []string{projectPath},
 				}
 				servers[name] = info
@@ -99,7 +102,7 @@ func listServers(config *ClaudeConfig) error {
 
 	// Print table
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "NAME\tTYPE\tURL\tCOMMAND")
+	fmt.Fprintln(w, "NAME\tTYPE\tURL\tCOMMAND\tARGS")
 
 	for _, name := range names {
 		info := servers[name]
@@ -111,7 +114,11 @@ func listServers(config *ClaudeConfig) error {
 		if command == "" {
 			command = "[N/A]"
 		}
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\n", info.Name, info.Type, url, command)
+		args := "[N/A]"
+		if len(info.Args) > 0 {
+			args = strings.Join(info.Args, " ")
+		}
+		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\n", info.Name, info.Type, url, command, args)
 	}
 
 	w.Flush()
@@ -216,7 +223,8 @@ func connectStdio(ctx context.Context, server *MCPServer) (*mcp.Client, func(), 
 		return nil, nil, fmt.Errorf("failed to start command: %w", err)
 	}
 
-	transport := stdio.NewStdioServerTransportWithIO(stdout, stdin)
+	innerTransport := stdio.NewStdioServerTransportWithIO(stdout, stdin)
+	transport := NewCleaningStdioTransport(innerTransport)
 	client := mcp.NewClient(transport)
 
 	cleanup := func() {
