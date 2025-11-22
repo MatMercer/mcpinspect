@@ -11,17 +11,30 @@ While configuring Claude Code commands, I noticed there was no easy way to speci
 * MacOS
   * Claude Code
 
-## Commands
+## Usage
 
 ```
-# Lists mcp servers (reads /Users/mmers/.claude.json$.projects[*].mcpServers* by default)
+mcpinspect [server-name] [flags]
+
+Flags:
+  -c, --config string   path to Claude config file (default "~/.claude.json")
+  -h, --help            help for mcpinspect
+```
+
+## Examples
+
+### List all configured MCP servers
+
+```
 $ mcpinspect
 NAME           TYPE   URL                         COMMAND
 linear-server  http   https://mcp.linear.app/mcp  [N/A]
 ...
+```
 
-$ mcpinspect -c (or --config) custom claude location
+### Inspect a specific server's tools
 
+```
 $ mcpinspect linear-server
 NAME                  DESCRIPTION
 create_comment        Create a comment on a specific Linear issue
@@ -33,6 +46,12 @@ get_issue             Retrieve detailed information about an issue by ID
 ...
 
 23 tools | http | Linear MCP v1.0.0
+```
+
+### Use a custom config file
+
+```
+$ mcpinspect -c /path/to/custom/claude.json
 ```
 
 ## Credits
