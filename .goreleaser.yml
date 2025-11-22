@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -22,11 +24,11 @@ builds:
       - goos: windows
         goarch: 'arm64'
     binary: '{{ .ProjectName }}'
-    main: main.go
+    main: .
 
 archives:
-- format: zip
-  name_template: '{{ .ProjectName }}_{{ .Version }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}'
+  - format: zip
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ if eq .Os "darwin" }}macOS{{ else }}{{ .Os }}{{ end }}_{{ .Arch }}'
 
 checksum:
   algorithm: sha256
