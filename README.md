@@ -20,6 +20,9 @@ curl -L https://github.com/MatMercer/mcpinspect/releases/latest/download/mcpinsp
 unzip mcpinspect.zip
 chmod +x mcpinspect
 sudo mv mcpinspect /usr/local/bin/
+
+# zsh requires this for auto complete
+rehash
 ```
 
 ## Usage
