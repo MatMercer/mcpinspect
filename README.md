@@ -11,6 +11,17 @@ While configuring Claude Code commands, I noticed there was no easy way to speci
 * MacOS
   * Claude Code
 
+## Installation
+
+### macOS (Apple Silicon)
+
+```bash
+curl -L https://github.com/MatMercer/mcpinspect/releases/latest/download/mcpinspect_macOS_arm64.zip -o mcpinspect.zip
+unzip mcpinspect.zip
+chmod +x mcpinspect
+sudo mv mcpinspect /usr/local/bin/
+```
+
 ## Usage
 
 ```
